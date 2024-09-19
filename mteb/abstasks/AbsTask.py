@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import logging
 import random
 from abc import ABC, abstractmethod
@@ -192,8 +193,6 @@ class AbsTask(ABC):
         self.dataset_transform()
         self.data_loaded = True
 
-    import os
-
     # Wrapper for loading datasets
     def load_dataset(*args, **kwargs) -> DatasetDict:
         dataset_name = args[0].split("/")[-1]
@@ -217,7 +216,7 @@ class AbsTask(ABC):
         """Load dataset from HuggingFace hub"""
         if self.data_loaded:
             return
-        self.dataset = load_dataset(**self.metadata_dict["dataset"])  # type: ignore
+        self.dataset = self.load_dataset(**self.metadata_dict["dataset"])  # type: ignore
         self.dataset_transform()
         self.data_loaded = True
 
