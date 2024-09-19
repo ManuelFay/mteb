@@ -184,11 +184,40 @@ class AbsTask(ABC):
             )  ## only take the specified test split.
         return dataset_dict
 
-    def load_data(self, **kwargs):
+    def load_data_og(self, **kwargs):
         """Load dataset from HuggingFace hub"""
         if self.data_loaded:
             return
         self.dataset = datasets.load_dataset(**self.metadata_dict["dataset"])  # type: ignore
+        self.dataset_transform()
+        self.data_loaded = True
+
+    import os
+
+    # Wrapper for loading datasets
+    def load_dataset(*args, **kwargs) -> DatasetDict:
+        dataset_name = args[0].split("/")[-1]
+        print("Loading dataset", dataset_name)
+        if os.path.exists(
+                "/lus/scratch/CT6/c1615122/SHARED/data/eval_datasets_hf/" + dataset_name
+        ):
+            print(
+                "Loading dataset from local storage at /lus/scratch/CT6/c1615122/SHARED/data/eval_datasets_hf/"
+            )
+            return datasets.load_dataset(
+                "/lus/scratch/CT6/c1615122/SHARED/data/eval_datasets_hf/" + dataset_name,
+                *args[1:],
+                **kwargs,
+            )
+        else:
+            print("Loading dataset from Hugging Face")
+            return datasets.load_dataset(*args, **kwargs)
+
+    def load_data(self, **kwargs):
+        """Load dataset from HuggingFace hub"""
+        if self.data_loaded:
+            return
+        self.dataset = load_dataset(**self.metadata_dict["dataset"])  # type: ignore
         self.dataset_transform()
         self.data_loaded = True
 
