@@ -195,7 +195,11 @@ class AbsTask(ABC):
 
     # Wrapper for loading datasets
     def load_dataset(*args, **kwargs) -> DatasetDict:
-        dataset_name = args[0].split("/")[-1]
+        print(f"Loading dataset with args: {args} and kwargs: {kwargs}")
+        try:
+            dataset_name = args[0].split("/")[-1]
+        except Exception:
+            dataset_name = kwargs.get("path").split("/")[-1]
         print("Loading dataset", dataset_name)
         if os.path.exists(
                 "/lus/scratch/CT6/c1615122/SHARED/data/eval_datasets_hf/" + dataset_name
