@@ -194,12 +194,10 @@ class AbsTask(ABC):
         self.data_loaded = True
 
     # Wrapper for loading datasets
-    def load_dataset(*args, **kwargs) -> DatasetDict:
-        print(f"Loading dataset with args: {args} and kwargs: {kwargs}")
-        try:
-            dataset_name = args[0].split("/")[-1]
-        except Exception:
-            dataset_name = kwargs.get("path").split("/")[-1]
+    @staticmethod
+    def load_dataset(**kwargs) -> DatasetDict:
+        print(f"Loading dataset with kwargs: {kwargs}")
+        dataset_name = kwargs.pop("path").split("/")[-1]
         print("Loading dataset", dataset_name)
         if os.path.exists(
                 "/lus/scratch/CT6/c1615122/SHARED/data/eval_datasets_hf/" + dataset_name
@@ -209,12 +207,11 @@ class AbsTask(ABC):
             )
             return datasets.load_dataset(
                 "/lus/scratch/CT6/c1615122/SHARED/data/eval_datasets_hf/" + dataset_name,
-                *args[1:],
                 **kwargs,
             )
         else:
             print("Loading dataset from Hugging Face")
-            return datasets.load_dataset(*args, **kwargs)
+            return datasets.load_dataset(**kwargs)
 
     def load_data(self, **kwargs):
         """Load dataset from HuggingFace hub"""
