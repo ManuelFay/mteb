@@ -11,14 +11,13 @@ def load_dataset(**kwargs):
     print(f"Loading dataset with kwargs: {kwargs}")
     dataset_name = kwargs.pop("path").split("/")[-1]
     print("Loading dataset", dataset_name)
-    if os.path.exists(
-            os.environ.get("LOCAL_DATASET_DIR", "/lus/scratch/CT6/c1615122/SHARED/data/eval_datasets_hf/") + dataset_name
-    ):
+    if os.path.exists(os.environ["LOCAL_DATASET_DIR"] + "/" + dataset_name):
         print(
-            "Loading dataset from local storage"
+            "Loading dataset from local storage at", 
+            os.environ["LOCAL_DATASET_DIR"] + "/" + dataset_name,
         )
         return datasets.load_dataset(
-            os.environ.get("LOCAL_DATASET_DIR", "/lus/scratch/CT6/c1615122/SHARED/data/eval_datasets_hf/") + dataset_name,
+            os.environ["LOCAL_DATASET_DIR"] + "/" + dataset_name,
             **kwargs,
         )
     else:
