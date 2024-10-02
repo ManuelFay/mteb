@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import logging
 import random
 from abc import ABC, abstractmethod
@@ -184,11 +185,39 @@ class AbsTask(ABC):
             )  ## only take the specified test split.
         return dataset_dict
 
-    def load_data(self, **kwargs):
+    def load_data_og(self, **kwargs):
         """Load dataset from HuggingFace hub"""
         if self.data_loaded:
             return
         self.dataset = datasets.load_dataset(**self.metadata_dict["dataset"])  # type: ignore
+        self.dataset_transform()
+        self.data_loaded = True
+
+    # Wrapper for loading datasets
+    @staticmethod
+    def load_dataset(**kwargs) -> DatasetDict:
+        print(f"Loading dataset with kwargs: {kwargs}")
+        dataset_name = kwargs.pop("path").split("/")[-1]
+        print("Loading dataset", dataset_name)
+        
+        if os.path.exists(os.environ["LOCAL_DATASET_DIR"] + "/" + dataset_name):
+            print(
+                "Loading dataset from local storage at",
+                os.environ["LOCAL_DATASET_DIR"] + "/" + dataset_name
+            )
+            return datasets.load_dataset(
+                os.environ["LOCAL_DATASET_DIR"] + "/" + dataset_name,
+                **kwargs,
+            )
+        else:
+            print("Loading dataset from Hugging Face")
+            return datasets.load_dataset(**kwargs)
+
+    def load_data(self, **kwargs):
+        """Load dataset from HuggingFace hub"""
+        if self.data_loaded:
+            return
+        self.dataset = self.load_dataset(**self.metadata_dict["dataset"])  # type: ignore
         self.dataset_transform()
         self.data_loaded = True
 

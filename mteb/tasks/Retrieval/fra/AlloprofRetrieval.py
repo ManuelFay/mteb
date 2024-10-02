@@ -1,10 +1,28 @@
 from __future__ import annotations
-
+import os
 import datasets
 
 from mteb.abstasks.TaskMetadata import TaskMetadata
 
 from ....abstasks.AbsTaskRetrieval import AbsTaskRetrieval
+
+
+def load_dataset(**kwargs):
+    print(f"Loading dataset with kwargs: {kwargs}")
+    dataset_name = kwargs.pop("path").split("/")[-1]
+    print("Loading dataset", dataset_name)
+    if os.path.exists(os.environ["LOCAL_DATASET_DIR"] + "/" + dataset_name):
+        print(
+            "Loading dataset from local storage at", 
+            os.environ["LOCAL_DATASET_DIR"] + "/" + dataset_name,
+        )
+        return datasets.load_dataset(
+            os.environ["LOCAL_DATASET_DIR"] + "/" + dataset_name,
+            **kwargs,
+        )
+    else:
+        print("Loading dataset from Hugging Face")
+        return datasets.load_dataset(**kwargs)
 
 
 class AlloprofRetrieval(AbsTaskRetrieval):
@@ -58,11 +76,11 @@ class AlloprofRetrieval(AbsTaskRetrieval):
         if self.data_loaded:
             return
         # fetch both subsets of the dataset
-        corpus_raw = datasets.load_dataset(
+        corpus_raw = load_dataset(
             name="documents",
             **self.metadata_dict["dataset"],
         )
-        queries_raw = datasets.load_dataset(
+        queries_raw = load_dataset(
             name="queries",
             **self.metadata_dict["dataset"],
         )
