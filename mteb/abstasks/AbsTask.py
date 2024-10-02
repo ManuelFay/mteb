@@ -200,13 +200,13 @@ class AbsTask(ABC):
         dataset_name = kwargs.pop("path").split("/")[-1]
         print("Loading dataset", dataset_name)
         if os.path.exists(
-                "/lus/scratch/CT6/c1615122/SHARED/data/eval_datasets_hf/" + dataset_name
+                os.environ.get("LOCAL_DATASET_DIR", "/lus/scratch/CT6/c1615122/SHARED/data/eval_datasets_hf/") + dataset_name
         ):
             print(
-                "Loading dataset from local storage at /lus/scratch/CT6/c1615122/SHARED/data/eval_datasets_hf/"
+                "Loading dataset from local storage at"
             )
             return datasets.load_dataset(
-                "/lus/scratch/CT6/c1615122/SHARED/data/eval_datasets_hf/" + dataset_name,
+                os.environ.get("LOCAL_DATASET_DIR", "/lus/scratch/CT6/c1615122/SHARED/data/eval_datasets_hf/") + dataset_name,
                 **kwargs,
             )
         else:
