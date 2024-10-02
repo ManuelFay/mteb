@@ -8,7 +8,7 @@ from pathlib import Path
 from time import time
 from typing import Any
 
-from datasets import Features, Value, load_dataset
+from datasets import Features, Value, load_dataset as _load_dataset
 
 from mteb.abstasks.TaskMetadata import HFSubset
 
@@ -71,6 +71,26 @@ class HFDataLoader:
         if not fIn.endswith(ext):
             raise ValueError(f"File {fIn} must be present with extension {ext}")
 
+    # Wrapper for loading datasets
+    @staticmethod
+    def load_dataset(**kwargs) -> DatasetDict:
+        print(f"Loading dataset with kwargs: {kwargs}")
+        dataset_name = kwargs.pop("path").split("/")[-1]
+        print("Loading dataset", dataset_name)
+        
+        if os.path.exists(os.environ["LOCAL_DATASET_DIR"] + "/" + dataset_name):
+            print(
+                "Loading dataset from local storage at",
+                os.environ["LOCAL_DATASET_DIR"] + "/" + dataset_name
+            )
+            return _load_dataset(
+                os.environ["LOCAL_DATASET_DIR"] + "/" + dataset_name,
+                **kwargs,
+            )
+        else:
+            print("Loading dataset from Hugging Face")
+            return _load_dataset(**kwargs)
+
     def load(
         self, split="test"
     ) -> tuple[dict[str, dict[str, str]], dict[str, str], dict[str, dict[str, int]]]:
@@ -119,15 +139,15 @@ class HFDataLoader:
 
     def _load_corpus(self):
         if self.hf_repo:
-            corpus_ds = load_dataset(
-                self.hf_repo,
-                "corpus",
+            corpus_ds = self.load_dataset(
+                path=self.hf_repo,
+                name="corpus",
                 keep_in_memory=self.keep_in_memory,
                 streaming=self.streaming,
             )
         else:
-            corpus_ds = load_dataset(
-                "json",
+            corpus_ds = self.load_dataset(
+                path="json",
                 data_files=self.corpus_file,
                 streaming=self.streaming,
                 keep_in_memory=self.keep_in_memory,
@@ -146,15 +166,15 @@ class HFDataLoader:
 
     def _load_queries(self):
         if self.hf_repo:
-            queries_ds = load_dataset(
-                self.hf_repo,
-                "queries",
+            queries_ds = self.load_dataset(
+                path=self.hf_repo,
+                name="queries",
                 keep_in_memory=self.keep_in_memory,
                 streaming=self.streaming,
             )
         else:
-            queries_ds = load_dataset(
-                "json",
+            queries_ds = self.load_dataset(
+                path="json",
                 data_files=self.query_file,
                 streaming=self.streaming,
                 keep_in_memory=self.keep_in_memory,
@@ -169,14 +189,14 @@ class HFDataLoader:
 
     def _load_qrels(self, split):
         if self.hf_repo:
-            qrels_ds = load_dataset(
-                self.hf_repo_qrels,
+            qrels_ds = self.load_dataset(
+                path=self.hf_repo_qrels,
                 keep_in_memory=self.keep_in_memory,
                 streaming=self.streaming,
             )[split]
         else:
-            qrels_ds = load_dataset(
-                "csv",
+            qrels_ds = self.load_dataset(
+                path="csv",
                 data_files=self.qrels_file,
                 delimiter="\t",
                 keep_in_memory=self.keep_in_memory,
