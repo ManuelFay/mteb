@@ -9,9 +9,11 @@ from ....abstasks.AbsTaskRetrieval import AbsTaskRetrieval
 
 def load_dataset(**kwargs):
     print(f"Loading dataset with kwargs: {kwargs}")
-    dataset_name = kwargs.pop("path").split("/")[-1]
+    dataset_path = kwargs.pop("path")
+    dataset_name = dataset_path.split("/")[-1]
     print("Loading dataset", dataset_name)
-    if os.path.exists(os.environ["LOCAL_DATASET_DIR"] + "/" + dataset_name):
+    
+    try:
         print(
             "Loading dataset from local storage at", 
             os.environ["LOCAL_DATASET_DIR"] + "/" + dataset_name,
@@ -20,9 +22,9 @@ def load_dataset(**kwargs):
             os.environ["LOCAL_DATASET_DIR"] + "/" + dataset_name,
             **kwargs,
         )
-    else:
+    except:
         print("Loading dataset from Hugging Face")
-        return datasets.load_dataset(**kwargs)
+        return datasets.load_dataset(dataset_path, **kwargs)
 
 
 class AlloprofRetrieval(AbsTaskRetrieval):
