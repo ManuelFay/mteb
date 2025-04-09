@@ -1,23 +1,21 @@
 from __future__ import annotations
 
+import asyncio
 import base64
-import io
 import os
-import time
 from functools import partial
-from typing import Any
+from io import BytesIO
+from typing import Any, List
 
 import aiohttp
-from tqdm.asyncio import tqdm_asyncio
-
 import torch
 from PIL import Image
 from torch.utils.data import DataLoader
 from tqdm import tqdm
+from tqdm.asyncio import tqdm_asyncio
 
 from mteb.encoder_interface import PromptType
 from mteb.model_meta import ModelMeta
-from mteb.requires_package import requires_image_dependencies, requires_package
 
 
 def illuin_v_api_loader(**kwargs):
@@ -29,11 +27,8 @@ def illuin_v_api_loader(**kwargs):
             model_name: str,
             **kwargs: Any,
         ):
-            """Wrapper for Illuin API embedding model,
-            """
-
+            """Wrapper for Illuin API embedding model"""
             self.model_name = model_name
-            api_key = os.getenv("HF_API_KEY")
             self.url = model_name
             self.HEADERS = {
                 "Accept": "application/json",
@@ -61,16 +56,13 @@ def illuin_v_api_loader(**kwargs):
         async def call_api_queries(self, queries: List[str]):
             embeddings = []
             semaphore = asyncio.Semaphore(16)
-            batch_size = 1
-            query_batches = list(batched(queries, batch_size))
-
             async with aiohttp.ClientSession() as session:
 
                 async def sem_post(batch):
                     async with semaphore:
                         return await self.post_queries(session, batch)
 
-                tasks = [asyncio.create_task(sem_post(batch)) for batch in query_batches]
+                tasks = [asyncio.create_task(sem_post([batch])) for batch in queries]
 
                 # ORDER-PRESERVING
                 results = await tqdm_asyncio.gather(*tasks, desc="Query batches")
@@ -83,8 +75,6 @@ def illuin_v_api_loader(**kwargs):
         async def call_api_images(self, images_b64: List[str]):
             embeddings = []
             semaphore = asyncio.Semaphore(16)
-            batch_size = 1
-            image_batches = list(batched(images_b64, batch_size))
 
             async with aiohttp.ClientSession() as session:
 
@@ -92,7 +82,7 @@ def illuin_v_api_loader(**kwargs):
                     async with semaphore:
                         return await self.post_images(session, batch)
 
-                tasks = [asyncio.create_task(sem_post(batch)) for batch in image_batches]
+                tasks = [asyncio.create_task(sem_post([batch])) for batch in images_b64]
 
                 # ORDER-PRESERVING
                 results = await tqdm_asyncio.gather(*tasks, desc="Doc batches")
