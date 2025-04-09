@@ -102,11 +102,11 @@ def illuin_v_api_loader(**kwargs):
 
             return embeddings
 
-        def forward_queries(self, queries: List[str], batch_size: int, **kwargs) -> torch.Tensor:
+        def forward_queries(self, queries: List[str]) -> torch.Tensor:
             response = asyncio.run(self.call_api_queries(queries))
             return response
 
-        def forward_passages(self, passages: List[Image.Image], batch_size: int, **kwargs) -> torch.Tensor:
+        def forward_passages(self, passages: List[Image.Image]) -> torch.Tensor:
             response = asyncio.run(self.call_api_images([self.convert_image_to_base64(doc) for doc in passages]))
             return response
 
