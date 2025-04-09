@@ -111,7 +111,7 @@ def illuin_v_api_loader(**kwargs):
             **kwargs: Any,
         ):
             all_text_embeddings = self.forward_queries(texts)
-            all_text_embeddings = torch.cat([torch.as_tensor(t) for t in all_text_embeddings], dim=0)
+            all_text_embeddings = torch.stack([torch.as_tensor(t) for t in all_text_embeddings], dim=0)
             return all_text_embeddings
 
         def get_image_embeddings(
@@ -133,7 +133,7 @@ def illuin_v_api_loader(**kwargs):
                 for i in tqdm(range(0, len(images), batch_size)):
                     batch_images = images[i : i + batch_size]
                     all_image_embeddings.extend(self.forward_passages(batch_images))
-            all_image_embeddings = torch.cat([torch.as_tensor(t) for t in all_image_embeddings], dim=0)
+            all_image_embeddings = torch.stack([torch.as_tensor(t) for t in all_image_embeddings], dim=0)
             return all_image_embeddings
 
         def calculate_probs(self, text_embeddings, image_embeddings):
