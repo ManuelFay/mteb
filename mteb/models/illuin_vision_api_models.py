@@ -9,6 +9,7 @@ from typing import Any, List
 
 import aiohttp
 import torch
+import torchvision
 from PIL import Image
 from torch.utils.data import DataLoader
 from tqdm import tqdm
@@ -125,12 +126,14 @@ def illuin_v_api_loader(**kwargs):
             all_image_embeddings = []
 
             if isinstance(images, DataLoader):
-                raise NotImplementedError
+                for batch_images in tqdm(images):
+                    batch_images = [torchvision.transforms.functional.to_pil_image(img) for img in batch_images]
+                    all_image_embeddings.extend(self.forward_passages(batch_images))
             else:
                 for i in tqdm(range(0, len(images), batch_size)):
                     batch_images = images[i : i + batch_size]
                     all_image_embeddings.extend(self.forward_passages(batch_images))
-                all_image_embeddings = torch.cat([torch.as_tensor(t) for t in all_image_embeddings], dim=0)
+            all_image_embeddings = torch.cat([torch.as_tensor(t) for t in all_image_embeddings], dim=0)
             return all_image_embeddings
 
         def calculate_probs(self, text_embeddings, image_embeddings):
