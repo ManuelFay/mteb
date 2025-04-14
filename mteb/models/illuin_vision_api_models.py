@@ -189,14 +189,14 @@ def illuin_v_api_loader(**kwargs):
 
 vidore_biqwen2 = ModelMeta(
     loader=partial(illuin_v_api_loader, model_name="https://es2rk709av11wzkm.us-east-1.aws.endpoints.huggingface.cloud"),
-    name="vidore/biqwen2-v0.1",
+    name="vidore/biqwen2-v0.1-api",
     languages=[],  # Unknown, but support >100 languages
     revision="1",
     release_date="2024-10-24",
     n_parameters=None,
     memory_usage_mb=None,
     max_tokens=None,
-    embed_dim=1024,
+    embed_dim=1536,
     license=None,
     similarity_fn_name="cosine",
     framework=[],
