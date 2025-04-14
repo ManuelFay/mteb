@@ -4,6 +4,7 @@ from functools import partial
 from typing import Any
 
 import torch
+import torchvision
 import transformers
 from packaging import version
 from PIL import Image
@@ -71,6 +72,7 @@ class ColPaliEngineWrapper:
         with torch.no_grad():
             if isinstance(images, DataLoader):
                 for batch_images in tqdm(images):
+                    batch_images = [torchvision.transforms.functional.to_pil_image(img) for img in batch_images]
                     img_inputs = self.processor.process_images(batch_images).to(self.model.device)
                     image_outputs = self.model(
                         **img_inputs, output_hidden_states=True, return_dict=True
