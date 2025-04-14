@@ -89,8 +89,7 @@ class ColPaliEngineWrapper:
             return torch.cat(all_image_embeddings, dim=0)
 
     def calculate_probs(self, text_embeddings, image_embeddings):
-        logits = torch.einsum("bd,cd->bc", text_embeddings, image_embeddings).to(torch.float32)
-        breakpoint()
+        logits = torch.matmul(image_embeddings, text_embeddings.T)
         probs = (logits * 100).softmax(dim=-1)
         return probs
 
