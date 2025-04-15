@@ -138,8 +138,8 @@ colpali_engine_models = ModelMeta(
     loader=partial(
         ColPaliEngineWrapper,
         model_name="vidore/biqwen2-v0.1",
-        torch_dtype=torch.float16,
-        device_map="mps",
+        torch_dtype=torch.bfloat16,
+        device_map="cuda",
     ),
     name="vidore/biqwen2-v0.1",
     languages=[],  # Unknown, but support >100 languages
