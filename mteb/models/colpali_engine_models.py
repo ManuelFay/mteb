@@ -56,7 +56,7 @@ class ColPaliEngineWrapper:
                     **text_inputs, output_hidden_states=True, return_dict=True
                 )
                 all_text_embeddings.append(text_outputs.cpu())
-        return torch.cat(all_text_embeddings, dim=0)
+        return torch.cat(all_text_embeddings, dim=0).to(dtype=torch.float32)
 
     def get_image_embeddings(
         self,
@@ -86,7 +86,7 @@ class ColPaliEngineWrapper:
                         **img_inputs, output_hidden_states=True, return_dict=True
                     )
                     all_image_embeddings.append(image_outputs.cpu())
-            return torch.cat(all_image_embeddings, dim=0)
+            return torch.cat(all_image_embeddings, dim=0).to(dtype=torch.float32)
 
     def calculate_probs(self, text_embeddings, image_embeddings):
         logits = torch.matmul(image_embeddings, text_embeddings.T)
@@ -138,8 +138,8 @@ colpali_engine_models = ModelMeta(
     loader=partial(
         ColPaliEngineWrapper,
         model_name="vidore/biqwen2-v0.1",
-        torch_dtype=torch.bfloat16,
-        device_map="cuda",
+        torch_dtype=torch.float16,
+        device_map="mps",
     ),
     name="vidore/biqwen2-v0.1",
     languages=[],  # Unknown, but support >100 languages
