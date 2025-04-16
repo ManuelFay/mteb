@@ -469,24 +469,29 @@ class MTEB:
 
             if isinstance(task, AbsTaskAggregate):
                 self_ = MTEB(tasks=task.metadata.tasks)
-                task_results = self_.run(
-                    model,
-                    verbosity=verbosity - 1,
-                    output_folder=output_folder,
-                    eval_splits=eval_splits,
-                    eval_subsets=eval_subsets,
-                    overwrite_results=overwrite_results,
-                    raise_error=raise_error,
-                    co2_tracker=co2_tracker,
-                    encode_kwargs=encode_kwargs,
-                    **kwargs,
-                )
-                new_results = task.combine_task_results(task_results)
-                evaluation_results.append(new_results)
+                try:
+                    task_results = self_.run(
+                        model,
+                        verbosity=verbosity - 1,
+                        output_folder=output_folder,
+                        eval_splits=eval_splits,
+                        eval_subsets=eval_subsets,
+                        overwrite_results=overwrite_results,
+                        raise_error=raise_error,
+                        co2_tracker=co2_tracker,
+                        encode_kwargs=encode_kwargs,
+                        **kwargs,
+                    )
+                    new_results = task.combine_task_results(task_results)
+                    evaluation_results.append(new_results)
 
-                if output_path:
-                    save_path = output_path / f"{task.metadata.name}.json"
-                    new_results.to_disk(save_path)
+                    if output_path:
+                        save_path = output_path / f"{task.metadata.name}.json"
+                        new_results.to_disk(save_path)
+                except Exception as e:
+                    logger.error(
+                        f"Error while evaluating {task.metadata_dict['name']}: {e}"
+                    )
                 del self.tasks[0]
                 continue
 
