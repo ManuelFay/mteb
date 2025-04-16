@@ -73,6 +73,14 @@ class ColPaliEngineWrapper:
             if isinstance(images, DataLoader):
                 for batch_images in tqdm(images):
                     batch_images = [torchvision.transforms.functional.to_pil_image(img) for img in batch_images]
+                    # scale it proportionally so that the smaller side is >= 28 if it wasn't already
+                    for i in range(len(batch_images)):
+                        if batch_images[i].size[0] < 28 or batch_images[i].size[1] < 28:
+                            batch_images[i] = batch_images[i].resize(
+                                (int(batch_images[i].size[0] * 28 / min(batch_images[i].size)),
+                                 int(batch_images[i].size[1] * 28 / min(batch_images[i].size))),
+                                Image.LANCZOS,
+                            )
                     img_inputs = self.processor.process_images(batch_images).to(self.model.device)
                     image_outputs = self.model(
                         **img_inputs, output_hidden_states=True, return_dict=True
